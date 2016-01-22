@@ -1,0 +1,50 @@
+Data explosion :
+
+The world of "big data" is changing dramatically right before our eyes.  
+The picure speaks a lot! There are about 4m searches on google every minute 2.5m new fb posts
+Statistics say that Ninety percent (90%) of the world’s data has been created in the last two years alone. 
+This explosion of data has resulted in the ever-growing number of systems and automation at all levels in all sizes of organizations. 
+
+Today, distributed systems like Google MapReduce [27], Microsoft Dryad [41], Apache Hadoop [1] (an open-source project) and Google Pregel [43] provide such platforms for businesses and users. However, even with these systems, big data analytics can take several hours, days or weeks to run, simply due to the data volumes involved. For example, a ratings prediction algorithm for the Netflix Prize challenge took nearly 20 hours to execute on 50 cores, and a large-scale image processing task to estimate geographic information took 3 days to complete using 400 cores [25]. 
+
+Big data analytics is the process of examining large data sets to uncover hidden patterns, unknown correlations, market trends, customer preferences and other useful business information. They apply machine learning algorithms etc to the data which transform the data. Due to the humungous size of the data, there could be unknown features in the data, possibily even outliers. Its pretty difficult for a data scientist to actually debug an unexpected result. 
+
+Big Data Debugging:
+
+The massive scale and unstructured nature of data, the complexity of these analytics pipelines, and long runtimes pose significant manageability and debugging challenges. Even a single error in these analytics can be extremely difficult to identify and remove. While one may debug them by re-running the entire analytics through a debugger for step-wise debugging, this can be expensive due to the amount of time and resources needed. Auditing and data validation are other major problems due to the growing ease of access to relevant data sources for use in experiments, sharing of data between scientific communities and use of third-party data in business enterprises [55, 31, 54, 23]. These problems will only become larger and more acute as these systems and data continue to grow. As such, more cost-efficient ways of analyzing DISC system analytics are crucial to their continued use.
+
+Data Lineage:
+
+To address such challenges, what we need is a means to track the lifecycle of each piece of data as it is ingested, processed and output by the analytics. This provides
+visibility into the analytics pipeline and simplifies tracing errors back to their sources. It also enables replaying specific portions or inputs of the dataflow for step-wise debugging or regenerating lost output (which can happen due to disk errors [20]). In fact, database systems have used such information, called data provenance, to address similar validation and debugging challenges already.
+
+Lineage Capture :
+Each actor in the DISC environment reads data items from an input I and creates a set of output items O. Given O = P(I), where P is an actor transform, provenance as-
+sociates input records i ∈ I with output records o ∈ O. Newt allows the developer to associate a subset of input records I ′ ⊆ I with each o. An association takes the
+form of (I ′ , P, o). To Newt, these associations represent data lineage, a specific form of provenance developed to perform tracing queries for arbitrary data warehousing transforms [7].
+
+Actors and Associations:
+
+Newt collects data lineage for each unique actor instance p by creating association pairs, (d in , d out ), that relate input data d in to output data d out . Newt stores lineage as a collection of relational tables, one for each actor instance. When the dataflow completes, Newt creates an association table A p for each actor with a row per association and columns for inputs and outputs.
+
+Containment relationships: Specifically, Ibis proposes that an operator can be contained within another and such a relationship between two operators is called operator containment. Operator containment implies that the contained (or child) operator performs a part of the logical operation of the containing (or parent) operator. For example, a MapReduce task is contained in a job. Similar containment relationships exist for data as well, called data containment. Data containment implies that the contained data is a subset of the containing data.Newt records instance containment relationships (e.g, record y is contained in file x) at run time.
+
+Dataflow reconsruction:
+
+Explicit : The simplest link is an explicitly specified link between two actors. When an actor is aware of its exact upstream or downstream actor, it
+can communicate this information to Newt.
+Logically inferred links : Newt allows developers to attach dataflow archetypes to each logical actor.For example, in the MapReduce architecture, the map actor
+type is the source for reduce, and vice-versa. Newt infers this from the dataflow archetypes and duly links map instances with reduce instances. However, there may be several MapReduce jobs in the dataflow, and linking all map instances with all reduce instances can create false links. To prevent this, such links are restricted to actor instances contained within a common actor instance of a containing (or parent) actor type. Thus, map and reduce instances are only linked to each other if they belong to the same job.
+Implicit links through dataset sharing. In DISC systems, sometimes there are implicit links, which are not specified during execution or through gsets. For
+example, an implicit link exists between an actor that wrote to a file and another actor that read from it. Newt creates a link between two such actors that share a
+dataset.
+
+Tracing and Replay:
+
+To express tracing queries, Newt provides an imperative function F = Trace (r[], dir, p root ) that takes as input a set of target data elements r[], a direction, and an actor instance p root that produced r[]. Trace returns F, a set of discovered tracing dataflows whose granularity is equal to or contained by p root . Each tracing dataflow is a topologically sorted set of actors that processed the traced data, its precursors, or its derivations. Tracing is simply a recursive sequence of equality joins between the association tables of directly connected actors in the dataflow graph.
+
+Challenges:
+
+To scale to large volumes of data and large numbers of actors, Newt distributes CPU and storage load across the cluster. Newt assigns a peer to an actor using weighted moving averages of CPU utilizations on all peers to find the peer with the lowest load. Once lineage is complete and can be imported into a table, Newt finds the peer with lowest disk utilization and creates the table on it.
+It is also important for Newt to be fault tolerant, to avoid the need to re-execute dataflows for capturing complete lineage. To address this, the Newt controller also assigns a secondary peer to each actor. Each client sends lineage synchronously to its primary peer. The primary peer, in turn, logs this lineage locally and replicates it to the secondary peer before acknowledging the client. The client waits for the acknowledgment before discarding its local copy of the lineage.
+

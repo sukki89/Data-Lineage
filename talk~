@@ -1,0 +1,14 @@
+slide 1:
+Before I talk about Data lineage and its necessity and importance I would like to say little bit about the data expolosion
+The world of "big data" is changing dramatically right before our eyes.  
+Statistics say that Ninety percent (90%) of the world’s data has been created in the last two years alone.
+
+The picure speaks a lot! There are about 4m searches on google every minute 2.5m new fb posts. Thats a lot of data! 
+
+The only tractable soln to store this data is distributed databases. Many platforms like Google MapReduce [27], Microsoft Dryad [41], Apache Hadoop [1] etc are used depending on the usecase and application. Ml algos are used on these large data sets to uncover hidden patterns, unknown correlations, market trends, customer preferences and other useful business information.
+
+Because huge size of the data the training model used for ML algos might not produce the same results when applied to the entire dataset. Due to a missing feature or an outlier etc. Debugging this cause of failure in distributed system is hard bacause of the following reasons
+
+slide 2:
+time,cost,effort. IS it possible at all to realistically debug a distributed data system ? 
+The ans is obviously YES! This is where data lineage becomes important!
